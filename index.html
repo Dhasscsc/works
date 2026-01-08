@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>தாஸ் பொது சேவை மையம் - Dashboard</title>
+    <style>
+        :root { 
+            --primary: #00796b; 
+            --secondary: #004d40; 
+            --bg: #f4f7f6; 
+            --danger: #ff5252;
+            --warning: #ff9800;
+            --success: #4caf50;
+            --gray: #666;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 0; 
+        }
+        
+        /* Header */
+        .header { 
+            background: var(--primary); 
+            color: white; 
+            text-align: center; 
+            padding: 25px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            position: relative;
+        }
+        
+        .header h1 { 
+            margin: 0; 
+            font-size: 32px; 
+        }
+        
+        .header p { 
+            margin: 5px 0; 
+            opacity: 0.9; 
+        }
+
+        .header-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .admin-login-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            white-space: nowrap;
+        }
+        
+        .admin-login-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .admin-status {
+            background: var(--success);
+            color: white;
+            border-radius: 5px;
+            padding: 8px 15px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .admin-status button {
+            background: rgba(0,0,0,0.2);
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .container { 
+            max-width: 1100px; 
+            margin: 30px auto; 
+            padding: 0 20px; 
+            position: relative;
+        }
+        
+        /* Navigation Controls */
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        .back-btn-container {
+            flex: 1;
+        }
+
+        .back-btn {
+            background: var(--gray);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #555;
+        }
+
+        .page-title {
+            flex: 2;
+            text-align: center;
+            color: var(--secondary);
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .admin-controls {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #d32f2f;
+        }
+
+        /* Login Modal */
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .login-form h3 {
+            margin-top: 0;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label { 
+            display: block; 
+            font-size: 14px; 
+            margin-bottom: 8px; 
+            color: #333; 
+            font-weight: 500;
+        }
+        
+        .form-group input { 
+            padding: 12px; 
+            border-radius: 5px; 
+            border: 1px solid #ccc; 
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .password-input {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .login-error {
+            color: var(--danger);
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .btn { 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            width: 100%;
+            font-size: 16px;
+        }
+        
+        .btn-login { 
+            background: var(--primary); 
+            color: white; 
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background: var(--secondary);
+        }
+        
+        /* Admin Panel */
+        .admin-panel { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin-bottom: 30px; 
+            border: 2px solid var(--primary); 
+            display: none;
+        }
+        
+        .admin-panel h3 { 
+            margin-top: 0; 
+            color: var(--primary); 
+        }
+        
+        .inline-form-group { 
+            display: inline-block; 
+            margin-right: 10px; 
+            margin-bottom: 10px;
+            vertical-align: top; 
+        }
+        
+        .admin-panel label { 
+            display: block; 
+            font-size: 12px; 
+            margin-bottom: 5px; 
+            color: #666; 
+        }
+        
+        .admin-panel input, .admin-panel select { 
+            padding: 10px; 
+            border-radius: 5px; 
+            border: 1px solid #ccc; 
+            width: 200px; 
+        }
+        
+        .btn-add { 
+            background: var(--primary); 
+            color: white; 
+            margin-top: 10px;
+            width: auto;
+        }
+        
+        /* Grid System */
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 20px; 
+            margin-top: 20px;
+        }
+        
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 20px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            border: 1px solid #ddd; 
+            position: relative; 
+            text-decoration: none; 
+            color: black; 
+        }
+        
+        .card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1); 
+            border-color: var(--primary); 
+        }
+        
+        .card img { 
+            width: 80px; 
+            height: 80px; 
+            object-fit: contain; 
+            margin-bottom: 10px; 
+            border-radius: 5px; 
+        }
+        
+        .card h4 { 
+            margin: 10px 0 5px 0; 
+        }
+        
+        .delete-btn { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background: var(--danger); 
+            color: white; 
+            border: none; 
+            border-radius: 50%; 
+            width: 25px; 
+            height: 25px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            display: none;
+            z-index: 10;
+        }
+
+        .service-count {
+            color: var(--primary);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .click-hint {
+            font-size: 11px;
+            color: blue;
+            margin-top: 5px;
+        }
+        
+        #viewTitle { 
+            color: var(--secondary); 
+            margin-top: 40px; 
+            border-bottom: 2px solid #ddd; 
+            padding-bottom: 10px; 
+        }
+
+        /* Breadcrumb Navigation */
+        .breadcrumb {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .breadcrumb a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb span {
+            color: #666;
+        }
+
+        .separator {
+            margin: 0 8px;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .inline-form-group {
+                display: block;
+                width: 100%;
+            }
+            
+            .admin-panel input, .admin-panel select {
+                width: 100%;
+            }
+            
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            
+            .header-controls {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin-top: 15px;
+                align-items: center;
+            }
+            
+            .nav-controls {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .back-btn-container, .admin-controls {
+                width: 100%;
+            }
+            
+            .back-btn, .logout-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .page-title {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Modal -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-form">
+            <h3>அட்மின் பகுதிக்கு உள்நுழைக</h3>
+            <div class="form-group">
+                <label>பயனர் பெயர்</label>
+                <input type="text" id="username" placeholder="பயனர் பெயரை உள்ளிடுக">
+            </div>
+            <div class="form-group">
+                <label>கடவுச்சொல்</label>
+                <div class="password-input">
+                    <input type="password" id="password" placeholder="கடவுச்சொல்லை உள்ளிடுக">
+                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">காட்டு</button>
+                </div>
+                <div class="login-error" id="loginError">தவறான பயனர் பெயர் அல்லது கடவுச்சொல்</div>
+            </div>
+            <button class="btn btn-login" onclick="login()">உள்நுழைக</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <h1>தாஸ் பொது சேவை மையம்</h1>
+        <p>(மத்திய மாநில அரசு அங்கீகாரம் பெற்றது)</p>
+        <p>தூத்துக்குடி - 628001</p>
+        <p><b>செல்:</b> 9843232324 | 8870232332 | 9585334365</p>
+        
+        <!-- Header Controls -->
+        <div class="header-controls">
+            <!-- Admin Login Button (shown when not logged in) -->
+            <button class="admin-login-btn" id="adminLoginBtn" onclick="showLoginModal()">அட்மின் உள்நுழைவு</button>
+            
+            <!-- Admin Status (shown when logged in) -->
+            <div class="admin-status" id="adminStatus" style="display: none;">
+                <span>அட்மின்</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Navigation Controls -->
+        <div class="nav-controls">
+            <div class="back-btn-container">
+                <!-- Back Button - Always visible in sub-services view -->
+                <button class="back-btn" id="backBtn" onclick="showMainDashboard()" style="display: none;">
+                    ← பின்னால் செல்ல
+                </button>
+            </div>
+            
+            <h2 class="page-title" id="pageTitle">தாஸ் பொது சேவைகள்</h2>
+            
+            <div class="admin-controls" id="adminControls" style="display: none;">
+                <button class="logout-btn" onclick="logout()">வெளியேறு</button>
+            </div>
+        </div>
+
+        <!-- Breadcrumb Navigation -->
+        <div class="breadcrumb" id="breadcrumb" style="display: none;">
+            <a href="javascript:void(0)" onclick="showMainDashboard()">முதன்மை சேவைகள்</a>
+            <span class="separator">/</span>
+            <span id="currentService"></span>
+        </div>
+        
+        <!-- Admin Panel -->
+        <div class="admin-panel" id="adminPanel">
+            <h3 id="formTitle">புதிய முதன்மை சேவையைச் சேர்க்க</h3>
+            
+            <div class="inline-form-group">
+                <label>பெயர்</label>
+                <input type="text" id="name" placeholder="எ.கா: ஆதார்">
+            </div>
+
+            <div class="inline-form-group">
+                <label>புகைப்படம் பதிவேற்றவும்</label>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
+
+            <div class="inline-form-group" id="linkGroup">
+                <label>இணைய முகவரி (Link)</label>
+                <input type="text" id="link" placeholder="https://...">
+            </div>
+
+            <button class="btn btn-add" onclick="saveData()">சேமி (Save Card)</button>
+        </div>
+
+        <!-- Services Grid -->
+        <div id="displayGrid" class="grid"></div>
+    </div>
+
+    <script>
+        // Admin credentials
+        const ADMIN_USERNAME = "admin";
+        const ADMIN_PASSWORD = "tasservice123";
+        
+        let currentView = 'main'; 
+        let currentParentId = null;
+        let isAdminLoggedIn = false;
+        let data = JSON.parse(localStorage.getItem('dasData')) || [];
+        
+        // Initialize the page
+        function init() {
+            // Check if admin is already logged in
+            const adminSession = sessionStorage.getItem('adminLoggedIn');
+            if (adminSession === 'true') {
+                isAdminLoggedIn = true;
+                showAdminInterface();
+            }
+            render();
+        }
+        
+        // Show login modal
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('username').focus();
+        }
+        
+        // Hide login modal
+        function hideLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
+        
+        // Toggle password visibility
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.toggle-password');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = 'மறை';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = 'காட்டு';
+            }
+        }
+        
+        // Login function
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginError = document.getElementById('loginError');
+            
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                isAdminLoggedIn = true;
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                showAdminInterface();
+                hideLoginModal();
+                render();
+            } else {
+                loginError.style.display = 'block';
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            isAdminLoggedIn = false;
+            sessionStorage.removeItem('adminLoggedIn');
+            hideAdminInterface();
+            render();
+        }
+        
+        // Show admin interface
+        function showAdminInterface() {
+            document.getElementById('adminLoginBtn').style.display = 'none';
+            document.getElementById('adminStatus').style.display = 'flex';
+            document.getElementById('adminControls').style.display = 'flex';
+            document.getElementById('adminPanel').style.display = 'block';
+        }
+        
+        // Hide admin interface
+        function hideAdminInterface() {
+            document.getElementById('adminLoginBtn').style.display = 'block';
+            document.getElementById('adminStatus').style.display = 'none';
+            document.getElementById('adminControls').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'none';
+            
+            // Return to main view if in sub view
+            if (currentView !== 'main') {
+                showMainDashboard();
+            }
+        }
+        
+        // Render the grid
+        function render() {
+            const grid = document.getElementById('displayGrid');
+            const backBtn = document.getElementById('backBtn');
+            const pageTitle = document.getElementById('pageTitle');
+            const breadcrumb = document.getElementById('breadcrumb');
+            const currentService = document.getElementById('currentService');
+            const formTitle = document.getElementById('formTitle');
+            const linkGroup = document.getElementById('linkGroup');
+            
+            grid.innerHTML = '';
+
+            if (currentView === 'main') {
+                // Main services view
+                backBtn.style.display = 'none';
+                breadcrumb.style.display = 'none';
+                linkGroup.style.display = 'none';
+                pageTitle.innerText = "அனைத்து முதன்மை சேவைகள்";
+                formTitle.innerText = "புதிய முதன்மை சேவையைச் சேர்க்க";
+                
+                if (data.length === 0) {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">
+                            <h3>சேவைகள் எதுவும் இல்லை</h3>
+                            <p>முதல் சேவையைச் சேர்க்க, அட்மினாக உள்நுழையவும்</p>
+                        </div>`;
+                } else {
+                    data.forEach((item, index) => {
+                        const deleteBtn = isAdminLoggedIn ? 
+                            `<button class="delete-btn" onclick="deleteItem(event, ${index})">×</button>` : '';
+                        
+                        grid.innerHTML += `
+                            <div class="card" onclick="showSubServices(${index})">
+                                ${deleteBtn}
+                                <img src="${item.img || 'https://via.placeholder.com/80'}" alt="${item.name}">
+                                <h4>${item.name}</h4>
+                                <div class="service-count">${item.subs.length} துணை சேவைகள்</div>
+                            </div>`;
+                    });
+                }
+            } else {
+                // Sub services view
+                backBtn.style.display = 'flex';
+                breadcrumb.style.display = 'block';
+                linkGroup.style.display = isAdminLoggedIn ? 'inline-block' : 'none';
+                
+                const parent = data[currentParentId];
+                pageTitle.innerText = parent.name;
+                currentService.innerText = parent.name;
+                formTitle.innerText = parent.name + " - புதிய துணை சேவை சேர்க்க";
+
+                if (parent.subs.length === 0) {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">
+                            <h3>துணை சேவைகள் எதுவும் இல்லை</h3>
+                            <p>முதல் துணை சேவையைச் சேர்க்க, அட்மினாக உள்நுழையவும்</p>
+                        </div>`;
+                } else {
+                    parent.subs.forEach((sub, subIndex) => {
+                        const deleteBtn = isAdminLoggedIn ? 
+                            `<button class="delete-btn" onclick="deleteSubItem(event, ${subIndex})">×</button>` : '';
+                        
+                        grid.innerHTML += `
+                            <a href="${sub.link}" target="_blank" class="card">
+                                ${deleteBtn}
+                                <img src="${sub.img || 'https://via.placeholder.com/80'}" alt="${sub.name}">
+                                <h4>${sub.name}</h4>
+                                <div class="click-hint">கிளிக் செய்தால் இணையதளத்திற்கு செல்லும்</div>
+                            </a>`;
+                    });
+                }
+            }
+            
+            // Show delete buttons if admin is logged in
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            deleteButtons.forEach(btn => {
+                btn.style.display = isAdminLoggedIn ? 'block' : 'none';
+            });
+        }
+
+        async function saveData() {
+            if (!isAdminLoggedIn) {
+                alert("சேவைகளை சேர்க்க அட்மினாக உள்நுழைய வேண்டும்.");
+                showLoginModal();
+                return;
+            }
+            
+            const name = document.getElementById('name').value;
+            const link = document.getElementById('link').value;
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!name) return alert("பெயர் கட்டாயம்!");
+
+            let imgBase64 = '';
+            if (fileInput.files && fileInput.files[0]) {
+                imgBase64 = await convertFileToBase64(fileInput.files[0]);
+            }
+
+            if (currentView === 'main') {
+                data.push({ name, img: imgBase64, subs: [] });
+            } else {
+                if (!link) return alert("இணைய முகவரி (Link) கட்டாயம்!");
+                data[currentParentId].subs.push({ name, img: imgBase64, link });
+            }
+
+            localStorage.setItem('dasData', JSON.stringify(data));
+            clearForm();
+            render();
+        }
+
+        function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function showSubServices(index) {
+            currentView = 'sub';
+            currentParentId = index;
+            render();
+        }
+
+        function showMainDashboard() {
+            currentView = 'main';
+            currentParentId = null;
+            render();
+        }
+
+        function deleteItem(e, index) {
+            if (!isAdminLoggedIn) {
+                alert("சேவைகளை நீக்க அட்மினாக உள்நுழைய வேண்டும்.");
+                showLoginModal();
+                return;
+            }
+            
+            e.stopPropagation();
+            if(confirm("நிச்சயமாக இந்த சேவையை நீக்க வேண்டுமா?")) {
+                data.splice(index, 1);
+                localStorage.setItem('dasData', JSON.stringify(data));
+                render();
+            }
+        }
+
+        function deleteSubItem(e, subIndex) {
+            if (!isAdminLoggedIn) {
+                alert("சேவைகளை நீக்க அட்மினாக உள்நுழைய வேண்டும்.");
+                showLoginModal();
+                return;
+            }
+            
+            e.preventDefault();
+            e.stopPropagation();
+            if(confirm("நிச்சயமாக இந்த துணை சேவையை நீக்க வேண்டுமா?")) {
+                data[currentParentId].subs.splice(subIndex, 1);
+                localStorage.setItem('dasData', JSON.stringify(data));
+                render();
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('name').value = '';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('link').value = '';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target === modal) {
+                hideLoginModal();
+            }
+        }
+        
+        // Handle Enter key in login form
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && document.getElementById('loginModal').style.display === 'flex') {
+                login();
+            }
+        });
+
+        // Initialize the application
+        init();
+    </script>
+</body>
+</html>
